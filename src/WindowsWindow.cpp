@@ -4,7 +4,7 @@
 #define RGS_WINDOW_ENTRY_NAME "Entry"
 #define RGS_WINDOW_CLASS_NAME "Class"
 
-bool RGS::WindowsWindow::s_inited = true;
+bool RGS::WindowsWindow::s_inited = false;
 
 RGS::WindowsWindow::WindowsWindow(const std::string title, unsigned short width, unsigned short height)
     : Window(title, width, height)
