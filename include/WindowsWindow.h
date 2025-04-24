@@ -15,10 +15,13 @@ namespace RGS
         ~WindowsWindow();
 
         void show() const override;
+        void draw_frame_buffer(const FrameBuffer& framebuffer) override;
 
     public:
         static void init();
         static void terminate();
+
+        static void poll_input_events();
 
     private:
         static void win_register();
@@ -26,6 +29,8 @@ namespace RGS
 
         static LRESULT CALLBACK WndProc(const HWND hWnd, const UINT msgID,
                                         const WPARAM wParam, const LPARAM lParam);
+
+        static void key_press_impl(WindowsWindow *window, const WPARAM wParam, const char state);
 
     private:
         HWND m_handle;

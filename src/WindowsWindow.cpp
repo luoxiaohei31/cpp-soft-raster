@@ -1,5 +1,7 @@
 #include "Base.hpp"
+#include "LMath.h"
 #include "WindowsWindow.h"
+#include "FrameBuffer.h"
 
 #define RGS_WINDOW_ENTRY_NAME "Entry"
 #define RGS_WINDOW_CLASS_NAME "Class"
@@ -71,6 +73,53 @@ void RGS::WindowsWindow::show() const
     ReleaseDC(m_handle, windowDC);
 }
 
+void RGS::WindowsWindow::draw_frame_buffer(const FrameBuffer &framebuffer)
+{
+    // 尽可能显示
+    const unsigned short fwidth = framebuffer.get_width();
+    const unsigned short fheigth = framebuffer.get_heigth();
+    const unsigned short width = m_width < fwidth ? m_width : fwidth;
+    const unsigned short height = m_height < fheigth ? m_height : fheigth;
+/*
+    for (std::size_t i = 0; i < height; i++)
+    {
+        for (std::size_t j = 0; j < width; j++)
+        {
+            // 翻转RGB显示
+            constexpr unsigned short channel_count = 3;
+            constexpr unsigned short rchannel = 2;
+            constexpr unsigned short gchannel = 1;
+            constexpr unsigned short bchannel = 0;
+
+            Vec3 color = framebuffer.get_color(j, fheigth - 1 - i);
+            const int pix_start = (i * m_width + j) * channel_count;
+            const int r_index = pix_start + rchannel;
+            const int g_index = pix_start + gchannel;
+            const int b_index = pix_start + bchannel;
+
+            m_buffer[r_index] = float2uchar(color.x);
+            m_buffer[g_index] = float2uchar(color.y);
+            m_buffer[b_index] = float2uchar(color.z);
+        }
+    }
+*/
+
+    for(int i=0;i<width;i++){
+        for(int j=0;j<height;j++){
+            Vec3 color=framebuffer.get_color(i,j);
+            const int pix_start = (i*height + j) * 3;
+            const int r_index = pix_start + 2;
+            const int g_index = pix_start + 1;
+            const int b_index = pix_start + 0;
+
+            m_buffer[r_index] = float2uchar(color.x);
+            m_buffer[g_index] = float2uchar(color.y);
+            m_buffer[b_index] = float2uchar(color.z);
+        }
+    }
+    this->show();
+}
+
 void RGS::WindowsWindow::init()
 {
     ASSERT(!s_inited);
@@ -118,6 +167,60 @@ LRESULT RGS::WindowsWindow::WndProc(const HWND hWnd, const UINT msgID, const WPA
     case WM_DESTROY:
         window->m_closed = true;
         return 0;
+    case WM_KEYDOWN:
+        key_press_impl(window, wParam, RGS_PRESS);
+        return 0;
+    case WM_KEYUP:
+        key_press_impl(window, wParam, RGS_RELEASE);
+        return 0;
     }
     return DefWindowProc(hWnd, msgID, wParam, lParam);
+}
+
+void RGS::WindowsWindow::key_press_impl(WindowsWindow *window, const WPARAM wParam, const char state)
+{
+    // 获取小键盘按键
+    auto get_pad = [wParam]() -> unsigned short
+    { return wParam + 224; };
+
+    if (wParam >= '0' && wParam <= '9')
+    {
+        window->m_keys[wParam] = state;
+        return;
+    }
+    if (get_pad() >= 320 && get_pad() <= 335)
+    {
+        window->m_keys[get_pad()] = state;
+        return;
+    }
+
+    if (wParam >= 'A' && wParam <= 'Z')
+    {
+        window->m_keys[wParam] = state;
+        return;
+    }
+
+    switch (wParam)
+    {
+    case VK_SPACE:
+        window->m_keys[RGS_KEY_SPACE] = state;
+        break;
+    case VK_SHIFT:
+        window->m_keys[RGS_KEY_LEFT_SHIFT] = state;
+        window->m_keys[RGS_KEY_RIGHT_SHIFT] = state;
+        break;
+
+    default:
+        break;
+    }
+}
+
+void RGS::WindowsWindow::poll_input_events()
+{
+    MSG msg;
+    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
 }
