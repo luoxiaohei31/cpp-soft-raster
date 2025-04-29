@@ -1,7 +1,7 @@
-#include "Base.hpp"
-#include "LMath.h"
-#include "WindowsWindow.h"
-#include "FrameBuffer.h"
+#include "RGS\LMath.h"
+#include "RGS\WindowsWindow.h"
+#include "RGS\FrameBuffer.h"
+#include "RGS\Base.hpp"
 
 #define RGS_WINDOW_ENTRY_NAME "Entry"
 #define RGS_WINDOW_CLASS_NAME "Class"
@@ -80,7 +80,7 @@ void RGS::WindowsWindow::draw_frame_buffer(const FrameBuffer &framebuffer)
     const unsigned short fheigth = framebuffer.get_heigth();
     const unsigned short width = m_width < fwidth ? m_width : fwidth;
     const unsigned short height = m_height < fheigth ? m_height : fheigth;
-/*
+
     for (std::size_t i = 0; i < height; i++)
     {
         for (std::size_t j = 0; j < width; j++)
@@ -102,9 +102,8 @@ void RGS::WindowsWindow::draw_frame_buffer(const FrameBuffer &framebuffer)
             m_buffer[b_index] = float2uchar(color.z);
         }
     }
-*/
 
-    for(int i=0;i<width;i++){
+    /*for(int i=0;i<width;i++){
         for(int j=0;j<height;j++){
             Vec3 color=framebuffer.get_color(i,j);
             const int pix_start = (i*height + j) * 3;
@@ -116,7 +115,7 @@ void RGS::WindowsWindow::draw_frame_buffer(const FrameBuffer &framebuffer)
             m_buffer[g_index] = float2uchar(color.y);
             m_buffer[b_index] = float2uchar(color.z);
         }
-    }
+    }*/
     this->show();
 }
 

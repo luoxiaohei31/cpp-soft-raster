@@ -1,6 +1,6 @@
-#include "Base.hpp"
-#include "FrameBuffer.h"
-#include "LMath.h"
+#include "RGS\FrameBuffer.h"
+#include "RGS\LMath.h"
+#include "RGS\Base.hpp"
 
 RGS::FrameBuffer::FrameBuffer(unsigned short width, unsigned short height)
     : m_width(width), m_height(height)
@@ -38,9 +38,10 @@ RGS::Vec3 RGS::FrameBuffer::get_color(unsigned short x, unsigned short y) const
 void RGS::FrameBuffer::set_color(unsigned short x, unsigned short y, const Vec3 &color)
 {
     auto index = this->get_pixel_index(x, y);
+    
     if (index < m_pixel_size && index >= 0)
     {
-        m_color_buffer[index] = color;
+        m_color_buffer[index] = RGS::color_map(color);
     }
     else
     {
@@ -65,7 +66,7 @@ void RGS::FrameBuffer::clear(const Vec3 &color = {0.0f, 0.0f, 0.0f})
 {
     for (unsigned int i = 0; i < m_pixel_size; i++)
     {
-        m_color_buffer[i]=color;
+        m_color_buffer[i]=RGS::color_map(color);
     }
 }
 

@@ -1,7 +1,9 @@
-#include "Application.h"
-#include "Window.h"
-#include"LMath.h"
-#include"FrameBuffer.h"
+#include "RGS\Application.h"
+#include "RGS\Window.h"
+#include"RGS\LMath.h"
+#include"RGS\FrameBuffer.h"
+#include"RGS\Renderer.hpp"
+#include"RGS\Shaders\BlinnShader.h"
 
 void RGS::Application::init()
 {
@@ -20,10 +22,19 @@ void RGS::Application::on_update()
         printf("0被按下\n");
 
     FrameBuffer framebuffer(m_width,m_height);
-    framebuffer.clear(Vec3{194,193,225});
-    //framebuffer.clear({1.0f,0.0f,1.0f});
+    framebuffer.clear({1.0f,0.0f,1.0f});
     m_window->draw_frame_buffer(framebuffer);
 
+    Program program(blinn_vertex_shader);
+    Triangle<BlinnVertex> tri;
+    tri[0].model_pos = { -10.0f, 10.0f, 10.0f, 1.0f };
+    tri[1].model_pos = { -10.0f, -10.0f, -10.0f, 1.0f };
+    tri[2].model_pos = { 30.0f, -10.0f, -10.0f, 1.0f };
+    BlinnUnforms uniforms;
+    const float PI = 3.1415926f;
+    uniforms.MVP = mat4_perspective(90.0f / 180.0f * PI, 1.0f, 1.0f, 10.0f);
+
+    Renderer::Draw(framebuffer, program, tri, uniforms);
 }
 
 RGS::Application::Application(const std::string name, unsigned short width, unsigned short height)

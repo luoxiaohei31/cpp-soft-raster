@@ -1,6 +1,6 @@
-#include "Window.h"
-#include "WindowsWindow.h"
-#include "Base.hpp"
+#include "RGS\Window.h"
+#include "RGS\WindowsWindow.h"
+#include "RGS\Base.hpp"
 
 RGS::Window::Window(const std::string title, unsigned short width, unsigned short height)
     : m_title(title), m_width(width), m_height(height)
