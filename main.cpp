@@ -4,20 +4,21 @@
 
 #include <iostream>
 
-int main(int, char **)
-{
+int main(int, char**){
 
     RGS::Application app("RGS", 400, 300);
 
     app.run();
 
-#ifndef TTT
-    using color = BenchMark::TextColor::color;
-    BenchMark::TextColor tc(color::F_BLUE | color::F_RED
-        | color::F_HIGHLITGHT);
-    BenchMark::TTime time;
-
+    {
+#define TTT
+#ifdef TTT
+        using color = BenchMark::TextColor::color;
+        BenchMark::TextColor tc(color::F_BLUE | color::F_RED
+            | color::F_HIGHLITGHT);
+        BenchMark::TTime time;
 #endif
+    }
 
-    return 0;
+        return 0;
 }

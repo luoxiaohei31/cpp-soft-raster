@@ -73,7 +73,14 @@ namespace RGS
     Vec3 cross(const Vec3& left, const Vec3& right);
     Vec3 normalize(const Vec3& v);
 
-    Mat4 operator*(const Mat4 &left, const Mat4 &right);
+    Vec4 operator+(const Vec4& left, const Vec4& right);
+    Vec4 operator-(const Vec4& left, const Vec4& right);
+    Vec4 operator*(const float left, const Vec4& right);
+    Vec4 operator*(const Vec4& left, const float right);
+    Vec4 operator/(const Vec4& left, const float right);
+
+    Vec4 operator*(const Vec4& left, const Vec4& right);
+    Mat4 operator*(const Mat4& left, const Mat4& right);
     Mat4& operator*=(Mat4& left, const Mat4& right);
     Mat4 mat4_indentity();
     Mat4 mat4_scale(float sx, float sy, float sz);

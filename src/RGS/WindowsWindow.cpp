@@ -102,20 +102,6 @@ void RGS::WindowsWindow::draw_frame_buffer(const FrameBuffer &framebuffer)
             m_buffer[b_index] = float2uchar(color.z);
         }
     }
-
-    /*for(int i=0;i<width;i++){
-        for(int j=0;j<height;j++){
-            Vec3 color=framebuffer.get_color(i,j);
-            const int pix_start = (i*height + j) * 3;
-            const int r_index = pix_start + 2;
-            const int g_index = pix_start + 1;
-            const int b_index = pix_start + 0;
-
-            m_buffer[r_index] = float2uchar(color.x);
-            m_buffer[g_index] = float2uchar(color.y);
-            m_buffer[b_index] = float2uchar(color.z);
-        }
-    }*/
     this->show();
 }
 

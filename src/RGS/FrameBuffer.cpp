@@ -37,15 +37,13 @@ RGS::Vec3 RGS::FrameBuffer::get_color(unsigned short x, unsigned short y) const
 
 void RGS::FrameBuffer::set_color(unsigned short x, unsigned short y, const Vec3 &color)
 {
-    auto index = this->get_pixel_index(x, y);
-    
-    if (index < m_pixel_size && index >= 0)
-    {
-        m_color_buffer[index] = RGS::color_map(color);
+    if ((x < 0) || (x >= m_width) || (y < 0) || (y > m_height)){
+        //ASSERT(false);
+        return;
     }
-    else
-    {
-        ASSERT(false);
+    else{
+        int index = get_pixel_index(x, y);
+        m_color_buffer[index] = RGS::color_map(color);
     }
 }
 

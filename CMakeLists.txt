@@ -7,3 +7,5 @@ add_executable(${PROJECT_NAME} main.cpp ${src_list})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC myLib)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE _GLIBCXX_DEBUG)

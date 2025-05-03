@@ -43,8 +43,8 @@ namespace RGS {
 
         private:
             enum class Plane{
-                PSOITIVE_W, PSOITIVE_X, PSOITIVE_Y,
-                PSOITIVE_Z, NEGATIVE_X, NEGATIVE_Y, NEGATIVE_Z
+                PSOITIVE_W, PSOITIVE_X, PSOITIVE_Y, PSOITIVE_Z,
+                            NEGATIVE_X, NEGATIVE_Y, NEGATIVE_Z
             };
 
             static bool is_vertex_Visble(const Vec4& clip_pos);
@@ -112,30 +112,73 @@ namespace RGS {
                 varyings_t varyings_[RGS_MAX_VARYINGS];
                 vertex_num = clip_against_plane(varyings_, varyings, Plane::PSOITIVE_W, vertex_num);
                 if (vertex_num == 0) return 0;
-                vertex_num = clip_against_plane(varyings_, varyings, Plane::PSOITIVE_X, vertex_num);
+                vertex_num = clip_against_plane(varyings, varyings_, Plane::PSOITIVE_X, vertex_num);
                 if (vertex_num == 0) return 0;
-                vertex_num = clip_against_plane(varyings, varyings_, Plane::NEGATIVE_X, vertex_num);
+                vertex_num = clip_against_plane(varyings_, varyings, Plane::NEGATIVE_X, vertex_num);
                 if (vertex_num == 0) return 0;
-                vertex_num = clip_against_plane(varyings_, varyings, Plane::PSOITIVE_Y, vertex_num);
+                vertex_num = clip_against_plane(varyings, varyings_, Plane::PSOITIVE_Y, vertex_num);
                 if (vertex_num == 0) return 0;
-                vertex_num = clip_against_plane(varyings, varyings_, Plane::NEGATIVE_Y, vertex_num);
+                vertex_num = clip_against_plane(varyings_, varyings, Plane::NEGATIVE_Y, vertex_num);
                 if (vertex_num == 0) return 0;
-                vertex_num = clip_against_plane(varyings_, varyings, Plane::PSOITIVE_Z, vertex_num);
+                vertex_num = clip_against_plane(varyings, varyings_, Plane::PSOITIVE_Z, vertex_num);
                 if (vertex_num == 0) return 0;
-                vertex_num = clip_against_plane(varyings, varyings_, Plane::NEGATIVE_Z, vertex_num);
+                vertex_num = clip_against_plane(varyings_, varyings, Plane::NEGATIVE_Z, vertex_num);
                 if (vertex_num == 0) return 0;
                 memcpy(varyings, varyings_, sizeof(varyings_));
 
                 return vertex_num;
             }
 
+            //归一化设备坐标
+            template<typename varyings_t>
+            static void caculate_ndc_pos(varyings_t(&varyings)[RGS_MAX_VARYINGS], const int vertex_num){
+                for (int i = 0; i < vertex_num; i++){
+                    float w = varyings[i].clip_pos.w;
+                    varyings[i].ndc_pos = varyings[i].clip_pos / w;
+                    varyings[i].ndc_pos.w = 1.0f / w;
+                }
+            }
+
+            template<typename varyings_t>
+            static void caculate_frag_pos(varyings_t(&varyings)[RGS_MAX_VARYINGS],
+                                        const int vertex_num,
+                                        const float width,
+                                        const float height){
+                for (int i = 0; i < vertex_num; i++){
+                    float x = (varyings[i].ndc_pos.x + 1.0f) * 0.5f * width;
+                    float y = (varyings[i].ndc_pos.y + 1.0f) * 0.5f * height;
+                    float z = (varyings[i].ndc_pos.z + 1.0f) * 0.5f;
+                    float w = varyings[i].ndc_pos.w;
+
+                    varyings[i].frag_pos.x = x;
+                    varyings[i].frag_pos.y = y;
+                    varyings[i].frag_pos.z = z;
+                    varyings[i].frag_pos.w = w;
+                }
+            }
+
+            template<typename vertex_t, typename uniforms_t, typename varyings_t>
+            static void rasterize_triangle(FrameBuffer& framebuffer,
+                                        const Program<vertex_t, uniforms_t, varyings_t>& program,
+                                        const varyings_t(&varyings)[3],
+                                        const uniforms_t& uniforms){
+                for (int i = 0; i < 3; i++){
+                    int x = varyings[i].frag_pos.x;
+                    int y = varyings[i].frag_pos.y;
+                    for (int j = -5; j < 6; j++){
+                        for (int k = -5; k < 6; k++)
+                            framebuffer.set_color(x + j, y + k, { 1.0f, 1.0f, 1.0f });
+                    }
+                }
+            }
+
         public:
             template<typename vertex_t, typename uniforms_t, typename varyings_t>
             static void Draw(FrameBuffer& framebuffer,
-                const Program<vertex_t, uniforms_t, varyings_t>& program,
-                const Triangle<vertex_t>& triangle,
-                const uniforms_t& uniforms) {
-                static_assert(std::is_base_of_v<VertextBase, vertex_t>, "vertex_t 必须继承自VertextBase");
+                            const Program<vertex_t, uniforms_t, varyings_t>& program,
+                            const Triangle<vertex_t>& triangle,
+                            const uniforms_t& uniforms) {
+                            static_assert(std::is_base_of_v<VertextBase, vertex_t>, "vertex_t 必须继承自VertextBase");
                 static_assert(std::is_base_of_v<VaryingBase, varyings_t>, "varyings_t必须继承自VaryingBase");
 
                 //Vertex Shading & Projection
@@ -145,7 +188,24 @@ namespace RGS {
                 }
 
                 //Clipping
-                int vertexNum=clip(varyings);
+                int vertexNum = clip(varyings);
+
+                //screen mapping
+                caculate_ndc_pos(varyings, vertexNum);
+                float f_width = framebuffer.get_width();
+                float f_height = framebuffer.get_heigth();
+                caculate_frag_pos(varyings, vertexNum, f_width, f_height);
+
+                //triangle assemble & rasterization
+                for (int i = 0; i < vertexNum - 2; i++){
+                    varyings_t tri_varyings[3];
+                    tri_varyings[0] = varyings[0];
+                    tri_varyings[1] = varyings[i + 1];
+                    tri_varyings[2] = varyings[i + 2];
+
+                    rasterize_triangle(framebuffer, program, tri_varyings, uniforms);
+                }
+
             }
     };
 }

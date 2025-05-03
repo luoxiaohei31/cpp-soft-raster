@@ -21,7 +21,7 @@ RGS::Vec3 RGS::color_map(const Vec3& color)
     auto map=[](float c)->float{
         c = c >= 0 ? c : 0;
         c = c < 255 ? c : 255;
-        return (float)c / 255;
+        return c > 1 ? (float)c / 255 : c;
     };
     const float r = map(color.x);
     const float g = map(color.y);
@@ -152,7 +152,33 @@ RGS::Vec3 RGS::normalize(const Vec3 &v)
     return v / len;
 }
 
-RGS::Mat4 RGS::operator*(const Mat4 &left, const Mat4 &right)
+RGS::Vec4 RGS::operator+(const Vec4& left, const Vec4& right){
+    Vec4 v;
+    v.x = left.x + right.x;
+    v.y = left.y + right.y;
+    v.z = left.z + right.z;
+    v.w = left.w + right.w;
+    return v;
+}
+
+RGS::Vec4 RGS::operator-(const Vec4& left, const Vec4& right){
+    return left + (-1.0f * right);
+}
+
+RGS::Vec4 RGS::operator*(const float left, const Vec4& right){
+    return Vec4{ left * right.x, left * right.y, left * right.z, left * right.w };
+}
+
+RGS::Vec4 RGS::operator*(const Vec4& left, const float right){
+    return right * left;
+}
+
+RGS::Vec4 RGS::operator/(const Vec4& left, const float right){
+    ASSERT(right != 0);
+    return left * (1.0f / right);
+}
+
+RGS::Mat4 RGS::operator*(const Mat4& left, const Mat4& right)
 {
     Mat4 res;
     for (short i = 0; i < 4; i++)

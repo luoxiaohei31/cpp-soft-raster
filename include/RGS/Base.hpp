@@ -17,7 +17,7 @@
         }                     \
     }
 
-    namespace BenchMark
+namespace BenchMark
     {
         struct TextColor{
             enum color{

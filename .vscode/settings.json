@@ -57,5 +57,6 @@
         "map": "cpp",
         "set": "cpp",
         "ratio": "cpp"
-    }
+    },
+    "C_Cpp.intelliSenseEngine": "default"
 }

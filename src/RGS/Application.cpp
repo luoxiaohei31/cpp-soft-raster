@@ -22,12 +22,11 @@ void RGS::Application::on_update()
         printf("0被按下\n");
 
     FrameBuffer framebuffer(m_width,m_height);
-    framebuffer.clear({1.0f,0.0f,1.0f});
-    m_window->draw_frame_buffer(framebuffer);
+    framebuffer.clear({0.0f,0.0f,0.0f});
 
     Program program(blinn_vertex_shader);
     Triangle<BlinnVertex> tri;
-    tri[0].model_pos = { -10.0f, 10.0f, 10.0f, 1.0f };
+    tri[0].model_pos = { 0.0f, 0.0f, -10.0f, 1.0f };
     tri[1].model_pos = { -10.0f, -10.0f, -10.0f, 1.0f };
     tri[2].model_pos = { 30.0f, -10.0f, -10.0f, 1.0f };
     BlinnUnforms uniforms;
@@ -35,6 +34,9 @@ void RGS::Application::on_update()
     uniforms.MVP = mat4_perspective(90.0f / 180.0f * PI, 1.0f, 1.0f, 10.0f);
 
     Renderer::Draw(framebuffer, program, tri, uniforms);
+    
+    m_window->draw_frame_buffer(framebuffer);
+
 }
 
 RGS::Application::Application(const std::string name, unsigned short width, unsigned short height)
