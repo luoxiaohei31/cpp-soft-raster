@@ -12,7 +12,7 @@ namespace RGS
     {
     public:
         WindowsWindow(const std::string title, unsigned short width, unsigned short height);
-        ~WindowsWindow();
+        virtual ~WindowsWindow();
 
         void show() const override;
         void draw_frame_buffer(const FrameBuffer& framebuffer) override;

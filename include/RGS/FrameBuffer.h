@@ -24,7 +24,7 @@ namespace RGS
 
         unsigned short get_width() const { return m_width; }
         unsigned short get_heigth() const { return m_height; }
-        float get_depth() const;
+        float get_depth(unsigned short x, unsigned short y) const;
         Vec3 get_color(unsigned short x,unsigned short y)const;
 
         void set_color(unsigned short x,unsigned short y,const Vec3& color);

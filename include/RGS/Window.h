@@ -22,15 +22,15 @@ namespace RGS
         virtual ~Window();
 
         virtual void show() const = 0;
-        virtual void draw_frame_buffer(const FrameBuffer& framebuffer)=0;
+        virtual void draw_frame_buffer(const FrameBuffer& framebuffer) = 0;
 
-        bool closed() const { return m_closed; }
-        char get_key(const uint32_t index) const { return m_keys[index]; }
+        bool closed() const{ return m_closed; }
+        char get_key(const int index) const{ return m_keys[index]; }
 
     public:
         static void init();
         static void terminate();
-        static Window *create(const std::string title, unsigned short width, unsigned short height);
+        static Window* create(const std::string title, unsigned short width, unsigned short height);
         static void poll_input_events();
     };
 }

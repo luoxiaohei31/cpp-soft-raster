@@ -21,6 +21,17 @@ RGS::FrameBuffer::~FrameBuffer()
     m_depth_buffer = nullptr;
 }
 
+float RGS::FrameBuffer::get_depth(unsigned short x, unsigned short y) const{
+    if ((x < 0) || (x >= m_width) || (y < 0) || (y >= m_height)){
+        ASSERT(false);
+        return 0.0f;
+    }
+    else{
+        uint32_t index = get_pixel_index((uint32_t)x, (uint32_t)y);
+        return m_depth_buffer[index];
+    }
+}
+
 RGS::Vec3 RGS::FrameBuffer::get_color(unsigned short x, unsigned short y) const
 {
     auto index = this->get_pixel_index(x, y);

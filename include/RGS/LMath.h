@@ -34,12 +34,13 @@ namespace RGS
     {
         float x, y, z, w;
 
-        constexpr Vec4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
+        constexpr Vec4(): x(0.0f), y(0.0f), z(0.0f), w(0.0f){}
+        constexpr Vec4(float val):x(val),y(val),z(val),w(val){}
         constexpr Vec4(float x, float y, float z, float w)
             : x(x), y(y), z(z), w(w) {}
 
-        operator Vec2() { return {x, y}; }
-        operator Vec3() { return {x, y, z}; }
+        operator Vec2() const{ return {x, y}; }
+        operator Vec3() const{ return {x, y, z}; }
         operator const std::string() const;
     };
 
@@ -61,6 +62,11 @@ namespace RGS
 
     };
 
+    Vec2 operator+(const Vec2& left, const Vec2& right);
+    Vec2 operator-(const Vec2& left, const Vec2& right);
+    Vec2 operator*(const float left, const Vec2& right);
+    Vec2 operator*(const Vec2& left, const float right);
+
     float dot(const Vec3 &left, const Vec3 &right);
     Vec4 operator*(const Mat4 &mat4, const Vec4 &vec4);
 
@@ -78,8 +84,8 @@ namespace RGS
     Vec4 operator*(const float left, const Vec4& right);
     Vec4 operator*(const Vec4& left, const float right);
     Vec4 operator/(const Vec4& left, const float right);
+    Vec4 normalize(const Vec4& v);
 
-    Vec4 operator*(const Vec4& left, const Vec4& right);
     Mat4 operator*(const Mat4& left, const Mat4& right);
     Mat4& operator*=(Mat4& left, const Mat4& right);
     Mat4 mat4_indentity();
@@ -93,8 +99,11 @@ namespace RGS
     Mat4 mat4_lookat(const Vec3& eye, const Vec3& target, const Vec3& up);
 
     float lerp(const float start, const float end, const float t);
+    Vec3 lerp(const Vec3& start, const Vec3& end, const float t);
     unsigned char float2uchar(const float f);
     float uchar2float(const unsigned char c);
+
+    float clamp(const float val, const float min, const float max);
 
     // 将RGB：0~255映射到0~1
     Vec3 color_map(const Vec3& v);

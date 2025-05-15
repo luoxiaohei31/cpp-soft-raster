@@ -6,6 +6,11 @@
 float RGS::lerp(const float start, const float end, const float t) {
     return end * t + start * (1.0f - t);
 }
+
+RGS::Vec3 RGS::lerp(const Vec3& start, const Vec3& end, const float t){
+    return end * t + start * (1.0f - t);
+}
+
 unsigned char RGS::float2uchar(const float f)
 {
     return (unsigned char)(f * 255.0f);
@@ -14,6 +19,15 @@ unsigned char RGS::float2uchar(const float f)
 float RGS::uchar2float(const unsigned char c)
 {
     return (float)c / 255.0f;
+}
+
+float RGS::clamp(const float val, const float min, const float max){
+    if (val < min)
+        return min;
+    else if (val > max)
+        return max;
+    else
+        return val;
 }
 
 RGS::Vec3 RGS::color_map(const Vec3& color)
@@ -94,9 +108,25 @@ RGS::Mat4::operator const std::string() const {
     return res;
 }
 
+RGS::Vec2 RGS::operator+(const Vec2& left, const Vec2& right){
+    return { left.x + right.x, left.y + right.y };
+}
+
+RGS::Vec2 RGS::operator-(const Vec2& left, const Vec2& right){
+    return left + (-1.0f * right);
+}
+
+RGS::Vec2 RGS::operator*(const float left, const Vec2& right){
+    return { left * right.x, left * right.y };
+}
+
+RGS::Vec2 RGS::operator*(const Vec2& left, const float right){
+    return right * left;
+}
+
 float RGS::dot(const Vec3 &left, const Vec3 &right)
 {
-    return left.x * right.x + left.y * left.y + left.z * right.z;
+    return left.x * right.x + left.y * right.y + left.z * right.z;
 }
 
 RGS::Vec4 RGS::operator*(const Mat4 &mat4, const Vec4 &vec4)
@@ -149,6 +179,7 @@ RGS::Vec3 RGS::cross(const Vec3 &left, const Vec3 &right)
 RGS::Vec3 RGS::normalize(const Vec3 &v)
 {
     float len = (float)std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    ASSERT(len != 0);
     return v / len;
 }
 
@@ -178,6 +209,12 @@ RGS::Vec4 RGS::operator/(const Vec4& left, const float right){
     return left * (1.0f / right);
 }
 
+RGS::Vec4 RGS::normalize(const Vec4& v){
+    float len = (float)std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
+    ASSERT(len != 0);
+    return v / len;
+}
+
 RGS::Mat4 RGS::operator*(const Mat4& left, const Mat4& right)
 {
     Mat4 res;
@@ -187,7 +224,7 @@ RGS::Mat4 RGS::operator*(const Mat4& left, const Mat4& right)
         {
             for (short k = 0; k < 4; k++)
             {
-                res.M[i][j] = left.M[i][k] * right.M[k][j];
+                res.M[i][j] += left.M[i][k] * right.M[k][j];
             }
         }
     }
@@ -202,7 +239,7 @@ RGS::Mat4 &RGS::operator*=(Mat4 &left, const Mat4 &right)
 
 RGS::Mat4 RGS::mat4_indentity()
 {
-    return Mat4({1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1});
+    return Mat4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, 0, 1 });
 }
 
 RGS::Mat4 RGS::mat4_scale(float sx, float sy, float sz)
@@ -243,10 +280,10 @@ RGS::Mat4 RGS::mat4_rotate_y(float angle)
     float s = (float)std::sin(angle);
     Mat4 m = mat4_indentity();
     m.M[0][0] = c;
-    m.M[0][3] = s;
-    m.M[3][0] = -s;
-    m.M[3][3] = c;
-    return Mat4();
+    m.M[0][2] = s;
+    m.M[2][0] = -s;
+    m.M[2][2] = c;
+    return m;
 }
 
 RGS::Mat4 RGS::mat4_rotate_z(float angle)
@@ -255,10 +292,10 @@ RGS::Mat4 RGS::mat4_rotate_z(float angle)
     float s = (float)std::sin(angle);
     Mat4 m = mat4_indentity();
     m.M[0][0] = c;
-    m.M[0][2] = -s;
+    m.M[0][1] = -s;
     m.M[1][0] = s;
-    m.M[1][2] = c;
-    return Mat4();
+    m.M[1][1] = c;
+    return m;
 }
 
 RGS::Mat4 RGS:: mat4_perspective(float fovy, float aspect, float lnear, float lfar)
@@ -267,7 +304,7 @@ RGS::Mat4 RGS:: mat4_perspective(float fovy, float aspect, float lnear, float lf
     float z_range = lfar - lnear;
     ASSERT(fovy > 0 && aspect > 0);
     ASSERT(lnear > 0 && lfar > 0 && z_range > 0);
-    m.M[1][1] = 1 / std::tan(fovy / 2);
+    m.M[1][1] = 1.0f / std::tan(fovy / 2);
     m.M[0][0] = m.M[1][1] / aspect;
     m.M[2][2] = -(lfar + lnear) / z_range;
     m.M[2][3] = -2 * lfar * lnear / z_range;
@@ -293,8 +330,8 @@ RGS::Mat4 RGS::mat4_lookat(const Vec3 &xAxis, const Vec3 &yAxis, const Vec3 &zAx
 
 RGS::Mat4 RGS::mat4_lookat(const Vec3 &eye, const Vec3 &target, const Vec3 &up)
 {
-    Vec3 zAxis=normalize(eye-target);
+    Vec3 zAxis = normalize(eye - target);
     Vec3 xAxis = normalize(cross(up, zAxis));
-    Vec3 yXxis = normalize(cross(xAxis, zAxis));
+    Vec3 yXxis = normalize(cross(zAxis, xAxis));
     return mat4_lookat(xAxis, yXxis, zAxis, eye);
 }
